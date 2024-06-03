@@ -1,17 +1,44 @@
-FROM google/golang:latest
+FROM golang:alpine3.17 AS binarybuilder
+RUN apk --no-cache --no-progress add --virtual \
+  build-deps \
+  build-base \
+  git \
+  linux-pam-dev
 
-ENV TAGS="sqlite redis memcache cert" USER="git" HOME="/home/git"
+WORKDIR /gogs.io/gogs
+COPY . .
 
-COPY  . /gopath/src/github.com/gogits/gogs/
-WORKDIR /gopath/src/github.com/gogits/gogs/
+RUN ./docker/build/install-task.sh
+RUN TAGS="cert pam" task build
 
-RUN  go get -v -tags="$TAGS" github.com/gogits/gogs \
-  && go build -tags="$TAGS" \
-  && useradd -d $HOME -m $USER \
-  && chown -R $USER .
+FROM alpine:3.17
+RUN apk --no-cache --no-progress add \
+  bash \
+  ca-certificates \
+  curl \
+  git \
+  linux-pam \
+  openssh \
+  s6 \
+  shadow \
+  socat \
+  tzdata \
+  rsync
 
-USER $USER
+ENV GOGS_CUSTOM /data/gogs
 
-ENTRYPOINT [ "./gogs" ]
+# Configure LibC Name Service
+COPY docker/nsswitch.conf /etc/nsswitch.conf
 
-CMD [ "web" ]
+WORKDIR /app/gogs
+COPY docker ./docker
+COPY --from=binarybuilder /gogs.io/gogs/gogs .
+
+RUN ./docker/build/finalize.sh
+
+# Configure Docker Container
+VOLUME ["/data", "/backup"]
+EXPOSE 22 3000
+HEALTHCHECK CMD (curl -o /dev/null -sS http://localhost:3000/healthcheck) || exit 1
+ENTRYPOINT ["/app/gogs/docker/start.sh"]
+CMD ["/bin/s6-svscan", "/app/gogs/docker/s6/"]

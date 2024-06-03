@@ -1,91 +1,113 @@
-Gogs - Go Git Service [![Build Status](https://travis-ci.org/gogits/gogs.svg?branch=master)](https://travis-ci.org/gogits/gogs)
-=====================
+![gogs-brand](https://user-images.githubusercontent.com/2946214/146899259-6a8b58ad-8d6e-40d2-ab02-79dc6aadabbf.png)
 
-[![Gitter](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/gogits/gogs?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+[![GitHub Workflow Status](https://img.shields.io/github/checks-status/gogs/gogs/main?logo=github&style=for-the-badge)](https://github.com/gogs/gogs/actions?query=branch%3Amain) [![Discord](https://img.shields.io/discord/382595433060499458.svg?style=for-the-badge&logo=discord)](https://discord.gg/9aqdHU7) [![Sourcegraph](https://img.shields.io/badge/view%20on-Sourcegraph-brightgreen.svg?style=for-the-badge&logo=sourcegraph)](https://sourcegraph.com/github.com/gogs/gogs)
 
-Gogs (Go Git Service) is a painless self-hosted Git service.
+[简体中文](README_ZH.md)
 
-![Demo](http://gogs.qiniudn.com/gogs_demo.gif)
+## 🔮 Vision
 
-##### Current version: 0.6.1 Beta
+The Gogs (`/gɑgz/`) project aims to build a simple, stable and extensible self-hosted Git service that can be set up in the most painless way. With Go, this can be done with an independent binary distribution across all platforms that Go supports, including Linux, macOS, Windows and ARM-based systems.
 
-### NOTICES
+## 📡 Overview
 
-- Due to testing purpose, data of [try.gogs.io](https://try.gogs.io) has been reset in **Jan 28, 2015** and will reset multiple times after. Please do **NOT** put your important data on the site.
-- The demo site [try.gogs.io](https://try.gogs.io) is running under `develop` branch.
-- You **MUST** read [CONTRIBUTING.md](CONTRIBUTING.md) before you start filing an issue or making a Pull Request, and **MUST** discuss with us on [Gitter](https://gitter.im/gogits/gogs) for UI changes and feature Pull Reuqests, otherwise it's high possibilities that we are not going to merge it.
-- If you think there are vulnerabilities in the project, please talk privately to **u@gogs.io**. Thanks!
+- Please visit [our home page](https://gogs.io) for user documentation.
+- Please refer to [CHANGELOG.md](CHANGELOG.md) for list of changes in each releases.
+- Want to try it before doing anything else? Do it [online](https://try.gogs.io/gogs/gogs)!
+- Having trouble? Help yourself with [troubleshooting](https://gogs.io/docs/intro/troubleshooting.html) or ask questions in [Discussions](https://github.com/gogs/gogs/discussions).
+- Want to help with localization? Check out the [localization documentation](https://gogs.io/docs/features/i18n.html).
+- Ready to get hands dirty? Read our [contributing guide](.github/CONTRIBUTING.md).
+- Hmm... What about APIs? We have experimental support with [documentation](https://github.com/gogs/docs-api).
 
-#### Other language version
+## 💌 Features
 
-- [简体中文](README_ZH.md)
+- User dashboard, user profile and activity timeline.
+- Access repositories via SSH, HTTP and HTTPS protocols.
+- User, organization and repository management.
+- Repository and organization webhooks, including Slack, Discord and Dingtalk.
+- Repository Git hooks, deploy keys and Git LFS.
+- Repository issues, pull requests, wiki, protected branches and collaboration.
+- Migrate and mirror repositories with wiki from other code hosts.
+- Web editor for quick editing repository files and wiki.
+- Jupyter Notebook and PDF rendering.
+- Authentication via SMTP, LDAP, reverse proxy, GitHub.com and GitHub Enterprise with 2FA.
+- Customize HTML templates, static files and many others.
+- Rich database backend, including PostgreSQL, MySQL, SQLite3 and [TiDB](https://github.com/pingcap/tidb).
+- Have localization over [31 languages](https://crowdin.com/project/gogs).
 
-## Purpose
+## 💾 Hardware requirements
 
-The goal of this project is to make the easiest, fastest, and most painless way to set up a self-hosted Git service. With Go, this can be done via an independent binary distribution across **ALL platforms** that Go supports, including Linux, Mac OS X, and Windows.
+- A Raspberry Pi or $5 Digital Ocean Droplet is more than enough to get you started. Some even use 64MB RAM Docker [CaaS](https://www.docker.com/blog/containers-as-a-service-caas/).
+- 2 CPU cores and 512MB RAM would be the baseline for teamwork.
+- Increase CPU cores when your team size gets significantly larger, memory footprint remains low.
 
-## Overview
+## 💻 Browser support
 
-- Please see the [Documentation](http://gogs.io/docs/intro/) for project design, known issues, and change log.
-- See the [Trello Board](https://trello.com/b/uxAoeLUl/gogs-go-git-service) to follow the develop team.
-- Want to try it before doing anything else? Do it [online](https://try.gogs.io/unknwon/gogs) or go down to the **Installation -> Install from binary** section!
-- Having trouble? Get help with [Troubleshooting](http://gogs.io/docs/intro/troubleshooting.md).
-- Want to help with localization? Check out the [guide](http://gogs.io/docs/features/i18n.html)!
+- Please see [Semantic UI](https://github.com/Semantic-Org/Semantic-UI#browser-support) for specific versions of supported browsers.
+- The smallest resolution officially supported is **1024*768**, however the UI may still look right in smaller resolutions, but no promises or fixes.
 
-## Features
+## 📜 Installation
 
-- Activity timeline
-- SSH/HTTP(S) protocol support
-- SMTP/LDAP/reverse proxy authentication support
-- Reverse proxy suburl support
-- Register/delete/rename account
-- Create/manage/delete organization with team management
-- Create/fork/migrate/mirror/delete/watch/rename/transfer public/private repository
-- Repository viewer/release/issue tracker
-- Repository and Organization level webhooks
-- Repository Git hooks
-- Add/remove repository collaborators
-- Gravatar and cache support
-- Mail service (register, issue)
-- Administration panel
-- Slack webhook integration
-- Drone CI integration
-- Supports MySQL, PostgreSQL and SQLite3
-- Social account login (GitHub, Google, QQ, Weibo)
-- Multi-language support ([11 languages](https://crowdin.com/project/gogs))
+Make sure you install the [prerequisites](https://gogs.io/docs/installation) first.
 
-## System Requirements
+There are 6 ways to install Gogs:
 
-- A cheap Raspberry Pi is powerful enough for basic functionality.
-- At least 2 CPU cores and 1GB RAM would be the baseline for teamwork.
+- [Install from binary](https://gogs.io/docs/installation/install_from_binary.html)
+- [Install from source](https://gogs.io/docs/installation/install_from_source.html)
+- [Install from packages](https://gogs.io/docs/installation/install_from_packages.html)
+- [Ship with Docker](https://github.com/gogs/gogs/tree/main/docker)
+- [Try with Vagrant](https://github.com/geerlingguy/ansible-vagrant-examples/tree/master/gogs)
 
-## Installation
+### Deploy to cloud
 
-Make sure you install the [prerequisites](http://gogs.io/docs/installation/) first.
+- [Cloudron](https://www.cloudron.io/store/io.gogs.cloudronapp.html)
+- [Sandstorm](https://github.com/cem/gogs-sandstorm)
+- [sloppy.io](https://github.com/sloppyio/quickstarters/tree/master/gogs)
+- [YunoHost](https://github.com/YunoHost-Apps/gogs_ynh)
+- [DPlatform](https://github.com/DFabric/DPlatform-Shell)
+- [LunaNode](https://github.com/LunaNode/launchgogs)
+- [alwaysdata](https://www.alwaysdata.com/en/marketplace/gogs/)
 
-There are 5 ways to install Gogs:
+### Tutorials
 
-- [Install from binary](http://gogs.io/docs/installation/install_from_binary.md)
-- [Install from source](http://gogs.io/docs/installation/install_from_source.md)
-- [Install from packages](http://gogs.io/docs/installation/install_from_packages.md)
-- [Ship with Docker](https://github.com/gogits/gogs/tree/master/docker)
-- [Install with Vagrant](https://github.com/geerlingguy/ansible-vagrant-examples/tree/master/gogs)
+- [Private Git Web Portal in Raspberry PI With Gogs](https://peppe8o.com/private-git-web-portal-in-raspberry-pi-with-gogs/)
+- [How To Set Up Gogs on Ubuntu 14.04](https://www.digitalocean.com/community/tutorials/how-to-set-up-gogs-on-ubuntu-14-04)
+- [Run your own GitHub-like service with the help of Docker](https://blog.hypriot.com/post/run-your-own-github-like-service-with-docker/)
+- [Dockerized Gogs git server and alpine postgres in 20 minutes or less](https://garthwaite.org/docker-gogs.html)
+- [Host Your Own Private GitHub with Gogs](https://eladnava.com/host-your-own-private-github-with-gogs-io/)
+- [使用 Gogs 搭建自己的 Git 服务器](https://blog.mynook.info/post/host-your-own-git-server-using-gogs/) (Chinese)
+- [阿里云上 Ubuntu 14.04 64 位安装 Gogs](https://my.oschina.net/luyao/blog/375654) (Chinese)
+- [Installing Gogs on FreeBSD](https://www.codejam.info/2015/03/installing-gogs-on-freebsd.html)
+- [How to install Gogs on a Linux Server (DigitalOcean)](https://www.youtube.com/watch?v=deSfX0gqefE)
 
-## Acknowledgments
+## 📦 Software, service and product support
 
-- Router and middleware mechanism of [Macaron](https://github.com/Unknwon/macaron).
-- Mail Service, modules design is inspired by [WeTalk](https://github.com/beego/wetalk).
-- System Monitor Status is inspired by [GoBlog](https://github.com/fuxiaohei/goblog).
-- Thanks [lavachen](http://www.lavachen.cn/) and [Rocker](http://weibo.com/rocker1989) for designing Logo.
-- Thanks [gobuild.io](http://gobuild.io) for providing binary compile and download service.
-- Thanks [Crowdin](https://crowdin.com/project/gogs) for providing open source translation plan.
+- [Fabric8](http://fabric8.io/) (DevOps)
+- [Jenkins](https://plugins.jenkins.io/gogs-webhook/) (CI)
+- [Puppet](https://forge.puppet.com/modules/Siteminds/gogs) (IT)
+- [Synology](https://www.synology.com) (Docker)
+- [Syncloud](https://syncloud.org/) (App Store)
 
-## Contributors
+## 🙇‍♂️ Acknowledgments
 
-- The [core team](http://gogs.io/team) of this project.
-- See [contributors page](https://github.com/gogits/gogs/graphs/contributors) for full list of contributors.
-- See [TRANSLATORS](conf/locale/TRANSLATORS) for full list of translators.
+<p>This project is proundly supported by:</p>
+<p>
+  <a href="https://www.digitalocean.com/">
+    <img src="https://opensource.nyc3.cdn.digitaloceanspaces.com/attribution/assets/SVG/DO_Logo_horizontal_blue.svg" width="201px">
+  </a>
+</p>
 
-## License
+Other acknowledgments:
 
-This project is under the MIT License. See the [LICENSE](https://github.com/gogits/gogs/blob/master/LICENSE) file for the full license text.
+- Thanks [Egon Elbre](https://twitter.com/egonelbre) for designing the original version of the logo.
+- Thanks [Crowdin](https://crowdin.com/project/gogs) for sponsoring open source translation plan.
+- Thanks [MonoVM](https://monovm.com/linux-vps/) for sponsoring VPS services.
+- Thanks [Buildkite](https://buildkite.com) for sponsoring open source CI/CD plan.
+
+## 👋 Contributors
+
+- See [contributors page](https://github.com/gogs/gogs/graphs/contributors) for top 100 contributors.
+- See [TRANSLATORS](conf/locale/TRANSLATORS) for public list of translators.
+
+## ⚖️ License
+
+This project is under the MIT License. See the [LICENSE](https://github.com/gogs/gogs/blob/main/LICENSE) file for the full license text.

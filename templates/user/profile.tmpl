@@ -1,102 +1,110 @@
-{{template "ng/base/head" .}}
-{{template "ng/base/header" .}}
-<div class="main-wrapper">
-    <div id="user-profile-page" class="container clear">
-        <div class="grid-1-5 left">
-            <div>
-                {{if .Owner.UseCustomAvatar}}
-                <a href="{{AppSubUrl}}/user/settings" id="profile-avatar" original-title="{{.i18n.Tr "user.change_custom_avatar"}}">
-                {{else}}
-                <a href="http://gravatar.com/emails/" id="profile-avatar" original-title="{{.i18n.Tr "user.change_avatar"}}">
-                {{end}}
-                    <img class="profile-avatar" src="{{.Owner.AvatarLink}}?s=200"title="{{.Owner.Name}}"/>
-                </a>
-                <div class="text-center" id="profile-name">
-                    {{if .Owner.FullName}}<span id="profile-fullname" class="center-block">{{.Owner.FullName}}</span><br>{{end}}
-                    <span class="center-block" id="profile-username">{{.Owner.Name}}</span>
-                </div>
-            </div>
-            <div class="profile-info">
-                <hr> 
-                <ul class="list-no-style">
-                    {{if .Owner.Location}}
-                    <li class="list-group-item"><i class="octicon octicon-location"></i>&nbsp;&nbsp;{{.Owner.Location}}</li>
-                    {{end}}
-                    {{if .Owner.Email}}
-                    <li class="list-group-item"><i class="octicon octicon-mail"></i>&nbsp;&nbsp;<a href="mailto:{{.Owner.Email}}" rel="nofollow">{{.Owner.Email}}</a></li>
-                    {{end}}
-                    {{if .Owner.Website}}
-                    <li class="list-group-item"><i class="octicon octicon-link"></i>&nbsp;&nbsp;<a target="_blank" href="{{.Owner.Website}}">{{.Owner.Website}}</a></li>
-                    {{end}}
-                    <li class="list-group-item"><i class="octicon octicon-clock"></i>&nbsp;&nbsp;{{.i18n.Tr "user.join_on"}} {{DateFmtShort .Owner.Created}}</li>
-                </ul>
-                <hr>
-                <ul class="list-no-style">
-                    <li class="list-group-item profile-rel">
-                        <a class="text-black" href="">
-                            <strong>{{.Owner.NumFollowers}}</strong>
-                            <p>{{.i18n.Tr "user.followers"}}</p>
-                        </a>
-                    </li>
-                    <li class="list-group-item profile-rel">
-                        <a class="text-black" href="">
-                            <strong>{{.Owner.NumStars}}</strong>
-                            <p>{{.i18n.Tr "user.starred"}}</p>
-                        </a>
-                    </li>
-                    <li class="list-group-item profile-rel">
-                        <a class="text-black" href="">
-                            <strong>{{.Owner.NumFollowings}}</strong>
-                            <p>{{.i18n.Tr "user.following"}}</p>
-                        </a>
-                    </li>
-                </ul>
-                <hr>
-            </div>
-        </div>
-        <div class="grid-4-5 left">
-            <div id="profile-body">
-                <ul class="menu menu-line" id="profile-header">
-                    <li>
-                        <a {{if not .TabName}}class="current"{{end}} href="{{.Owner.HomeLink}}"><i class="octicon octicon-repo"></i> {{.i18n.Tr "user.repositories"}}</a>
-                    </li>
-                    <li>
-                        <a {{if eq .TabName "activity"}}class="current"{{end}} href="{{.Owner.HomeLink}}?tab=activity"><i class="octicon octicon-repo"></i> {{.i18n.Tr "user.activity"}}</a>
-                    </li>
-                </ul>
-                <div class="tab-content">
-                    {{if eq .TabName "activity"}}
-                    <div class="tab-pane active" id="dashboard-news">
-                    <br>
-                    {{template "user/dashboard/feeds" .}}
-                    </div>
-                    {{else}}
-                    <div class="tab-pane active">
-                        <div id="org-repo-list">
-                            {{range .Repos}}
-                                {{if or (not .IsPrivate) (.HasAccess $.SignedUser)}}
-                                <div class="org-repo-item">
-                                    <ul class="org-repo-status right">
-                                        <li><i class="octicon octicon-star"></i> {{.NumStars}}</li>
-                                        <li><i class="octicon octicon-git-branch"></i> {{.NumForks}}</li>
-                                    </ul>
-                                    <h2>
-                                        <a href="{{AppSubUrl}}/{{$.Owner.Name}}/{{.Name}}">{{.Name}}</a>
-                                        {{if .IsPrivate}}
-                                        <span class="text-gold"><i class="octicon octicon-lock"></i></span>
-                                        {{end}}
-                                    </h2>
-                                    <p class="org-repo-description">{{.Description}}</p>
-                                    <p class="org-repo-updated">{{$.i18n.Tr "org.repo_updated"}} {{TimeSince .Updated $.i18n.Lang}}</p>
-                                </div>
-                                {{end}}
-                            {{end}}
-                        </div>
-                    </div>
-                    {{end}}
-                </div>
-            </div>
-        </div>
-    </div>
+{{template "base/head" .}}
+<div class="user profile">
+	<div class="ui container">
+		<div class="ui grid">
+			<div class="ui five wide column">
+				<div class="ui card">
+					{{if eq .LoggedUserName .Owner.Name}}
+						<a class="profile-avatar image poping up" href="{{AppSubURL}}/user/settings/avatar" id="profile-avatar" data-content="{{.i18n.Tr "user.change_avatar"}}" data-variation="inverted tiny" data-position="bottom center">
+							<img src="{{AppendAvatarSize .Owner.AvatarURLPath 287}}" title="{{.Owner.Name}}"/>
+						</a>
+					{{else}}
+						<span class="profile-avatar image">
+							<img src="{{AppendAvatarSize .Owner.AvatarURLPath 287}}" title="{{.Owner.Name}}"/>
+						</span>
+					{{end}}
+					<div class="content">
+						{{if .Owner.FullName}}<span class="header text center">{{.Owner.FullName}}</span>{{end}}
+						<span class="username text center">{{.Owner.Name}}</span>
+					</div>
+					<div class="extra content">
+						<ul class="text black">
+							{{if .Owner.Location}}
+								<li><i class="octicon octicon-location"></i> {{.Owner.Location}}</li>
+							{{end}}
+							{{if and .Owner.Email .IsLogged}}
+								<li>
+									<i class="octicon octicon-mail"></i>
+									<a href="mailto:{{.Owner.Email}}" rel="nofollow">{{.Owner.Email}}</a>
+								</li>
+							{{end}}
+							{{if .Owner.Website}}
+								<li>
+									<i class="octicon octicon-link"></i>
+									<a target="_blank" rel="noopener noreferrer me nofollow" href="{{.Owner.Website}}">{{.Owner.Website}}</a>
+								</li>
+							{{end}}
+							<li><i class="octicon octicon-clock"></i> {{.i18n.Tr "user.join_on"}} {{DateFmtShort .Owner.Created}}</li>
+							<li>
+								<i class="octicon octicon-person"></i>
+								<a href="{{.Owner.HomeURLPath}}/followers">
+									{{.Owner.NumFollowers}} {{.i18n.Tr "user.followers"}}
+								</a>
+								-
+								<a href="{{.Owner.HomeURLPath}}/following">
+									{{.Owner.NumFollowing}} {{.i18n.Tr "user.following"}}
+								</a>
+							</li>
+							{{/*
+							<li>
+								<i class="octicon octicon-star"></i>
+								<a href="{{.Owner.HomeURLPath}}/stars">
+									{{.Owner.NumStars}} {{.i18n.Tr "user.starred"}}
+								</a>
+							</li>
+							*/}}
+							{{if .Orgs}}
+							<li>
+								{{range .Orgs}}
+									<a href="{{.HomeURLPath}}"><img class="ui mini image poping up" src="{{.AvatarURLPath}}" data-content="{{.Name}}" data-position="top center" data-variation="tiny inverted"></a>
+								{{end}}
+							</li>
+							{{end}}
+							{{if and .IsLogged (ne .LoggedUserName .Owner.Name)}}
+								<li class="follow">
+									{{if .LoggedUser.IsFollowing .Owner.ID}}
+										<form action="{{.Link}}/action/unfollow?redirect_to={{$.Link}}" method="POST">
+											{{.CSRFTokenHTML}}
+											<button class="ui basic red button">
+												<i class="octicon octicon-person"></i> {{.i18n.Tr "user.unfollow"}}
+											</button>
+										</form>
+									{{else}}
+										<form action="{{.Link}}/action/follow?redirect_to={{$.Link}}" method="POST">
+											{{.CSRFTokenHTML}}
+											<button class="ui basic green button">
+												<i class="octicon octicon-person"></i> {{.i18n.Tr "user.follow"}}
+											</button>
+										</form>
+									{{end}}
+								</li>
+							{{end}}
+						</ul>
+					</div>
+				</div>
+			</div>
+			<div class="ui eleven wide column">
+				<div class="ui secondary pointing menu">
+					<a class="{{if ne .TabName "activity"}}active{{end}} item" href="{{.Owner.HomeURLPath}}">
+						<i class="octicon octicon-repo"></i> {{.i18n.Tr "user.repositories"}}
+					</a>
+					<a class="item">
+						<a class="{{if eq .TabName "activity"}}active{{end}} item" href="{{.Owner.HomeURLPath}}?tab=activity">
+							<i class="octicon octicon-rss"></i> {{.i18n.Tr "user.activity"}}
+						</a>
+					</a>
+				</div>
+				{{if ne .TabName "activity"}}
+					{{template "explore/repo_list" .}}
+					{{template "explore/page" .}}
+				{{else}}
+					<br>
+					<div class="feeds">
+						{{template "user/dashboard/feeds" .}}
+					</div>
+				{{end}}
+			</div>
+		</div>
+	</div>
 </div>
-{{template "ng/base/footer" .}}
+{{template "base/footer" .}}

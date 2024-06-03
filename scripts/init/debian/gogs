@@ -3,6 +3,8 @@
 # Provides:          gogs
 # Required-Start:    $syslog $network
 # Required-Stop:     $syslog
+# Should-Start:      mysql postgresql
+# Should-Stop:       mysql postgresql
 # Default-Start:     2 3 4 5
 # Default-Stop:      0 1 6
 # Short-Description: A self-hosted Git service written in Go.
@@ -15,7 +17,7 @@
 
 # PATH should only include /usr/* if it runs after the mountnfs.sh script
 PATH=/sbin:/usr/sbin:/bin:/usr/bin
-DESC="Go Git Service"
+DESC="Gogs"
 NAME=gogs
 SERVICEVERBOSE=yes
 PIDFILE=/var/run/$NAME.pid
@@ -48,11 +50,13 @@ do_start()
 	#   0 if daemon has been started
 	#   1 if daemon was already running
 	#   2 if daemon could not be started
-	sh -c "start-stop-daemon --start --quiet --pidfile $PIDFILE --make-pidfile \\
-			--exec $DAEMON -- $DAEMON_ARGS --test > /dev/null \\
+	sh -c "USER=$USER start-stop-daemon --start --quiet --pidfile $PIDFILE --make-pidfile \\
+			--test --chdir $WORKINGDIR --chuid $USER \\
+			--exec $DAEMON -- $DAEMON_ARGS > /dev/null \\
 			|| return 1"
-	sh -c "start-stop-daemon --start --quiet --pidfile $PIDFILE --make-pidfile \\
-			--background --exec /bin/su -- - $USER -c \"cd \\\"$WORKINGDIR\\\" && $DAEMON -- $DAEMON_ARGS\" \\
+	sh -c "USER=$USER start-stop-daemon --start --quiet --pidfile $PIDFILE --make-pidfile \\
+			--background --chdir $WORKINGDIR --chuid $USER \\
+			--exec $DAEMON -- $DAEMON_ARGS \\
 			|| return 2"
 }
 
@@ -120,5 +124,3 @@ case "$1" in
 		exit 3
 		;;
 esac
-
-:

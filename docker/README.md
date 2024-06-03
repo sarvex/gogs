@@ -1,89 +1,156 @@
-Docker
-======
+# Docker for Gogs
 
-TOOLS ARE WRITTEN FOR TESTING AND TO SEE WHAT IT IS!
+![Docker pulls](https://img.shields.io/docker/pulls/gogs/gogs?logo=docker&style=for-the-badge)
 
-For this to work you will need the nifty docker tool [fig].
+Visit [Docker Hub](https://hub.docker.com/u/gogs) or [GitHub Container registry](https://github.com/gogs/gogs/pkgs/container/gogs) to see all available images and tags.
 
-The most simple setup will look like this:
+## Usage
 
-```sh
-./assemble_blocks.sh docker_gogs w_db option_db_mysql
-fig up
-
-```
-
-That's it. You have GoGS running in docker linked to a MySQL docker container.
-
-Now visit http://localhost:3000/ and give details for the admin account an you're up and running.
-
-
-How does it work
-----------------
-
-`./assemble_blocks.sh` will look in `blocks` for subdirectories.
-In the subdirectories there are three relevant files: `Dockerfile`, `config` and `fig`.
-
-`Dockerfile` will be copied to `docker/` (also means last `Dockerfile` wins).
-
-The `config` file contains lines which will in the gogs docker container end up in `$GOGS_PATH/custom/config/app.ini` and by this gogs will be configured.
-Here you can define things like the MySQL server for your database block.
-
-The `fig` file will just be added to `fig.yml`, which is used by fig to manage your containers.
-This includes container linking!
-
-Just have a look at them and it will be clear how to write your own blocks.
-
-Just some things
-
-    - all files (`Dockerfile`, `fig` and `config`) are optional
-    - the gogs block should always be the first block
-
-Currently the blocks are designed that, the blocks that start with `docker` pull in the base docker image.
-Then one block starting with `w` defines, what containers should be linked to the gogs container.
-For every option in the `w` block you need to add an `option` container.
-
-Example:
+To keep your data out of Docker container, we do a volume (`/var/gogs` -> `/data`) here, and you can change it based on your situation.
 
 ```sh
-./assemble_blocks.sh docker_gogs w_db_cache option_db_mysql option_cache_redis
+# Pull image from Docker Hub.
+$ docker pull gogs/gogs
+
+# Create local directory for volume.
+$ mkdir -p /var/gogs
+
+# Use `docker run` for the first time.
+$ docker run --name=gogs -p 10022:22 -p 10880:3000 -v /var/gogs:/data gogs/gogs
+
+# Use `docker start` if you have stopped it.
+$ docker start gogs
 ```
 
+Note: It is important to map the SSH service from the container to the host and set the appropriate SSH Port and URI settings when setting up Gogs for the first time. To access and clone Git repositories with the above configuration you would use: `git clone ssh://git@hostname:10022/username/myrepo.git` for example.
 
-More sophisticated Example
---------------------------
+Files will be store in local path `/var/gogs` in my case.
 
-Here is a more elaborated example
+Directory `/var/gogs` keeps Git repositories and Gogs data:
+
+    /var/gogs
+    |-- git
+    |   |-- gogs-repositories
+    |-- ssh
+    |   |-- # ssh public/private keys for Gogs
+    |-- gogs
+        |-- conf
+        |-- data
+        |-- log
+
+#### Custom directory
+
+The "custom" directory may not be obvious in Docker environment. The `/var/gogs/gogs` (in the host) and `/data/gogs` (in the container) is already the "custom" directory and you do not need to create another layer but directly edit corresponding files under this directory.
+
+#### Using Docker volumes
 
 ```sh
-./assemble_blocks.sh docker_gogs w_db_cache_session option_db_postgresql option_cache_redis option_session_mysql
-fig up
+# Create docker volume.
+$ docker volume create --name gogs-data
+
+# Use `docker run` for the first time.
+$ docker run --name=gogs -p 10022:22 -p 10880:3000 -v gogs-data:/data gogs/gogs
 ```
 
-This will set up four containters and link them proberly. One for each of
+## Settings
 
-    - gogs
-    - database (postgresql)
-    - cache (redis)
-    - session (mysql)
+### Application
 
-WARNING: This will not work at the Moment! MySQL session is broken!
+Most of the settings are obvious and easy to understand, but there are some settings can be confusing by running Gogs inside Docker:
 
+- **Repository Root Path**: keep it as default value `/home/git/gogs-repositories` because `start.sh` already made a symbolic link for you.
+- **Run User**: keep it as default value `git` because `build/finalize.sh` already setup a user with name `git`.
+- **Domain**: fill in with Docker container IP (e.g. `192.168.99.100`). But if you want to access your Gogs instance from a different physical machine, please fill in with the hostname or IP address of the Docker host machine.
+- **SSH Port**: Use the exposed port from Docker container. For example, your SSH server listens on `22` inside Docker, **but** you expose it by `10022:22`, then use `10022` for this value. **Builtin SSH server is not recommended inside Docker Container**
+- **HTTP Port**: Use port you want Gogs to listen on inside Docker container. For example, your Gogs listens on `3000` inside Docker, **and** you expose it by `10880:3000`, but you still use `3000` for this value.
+- **Application URL**: Use combination of **Domain** and **exposed HTTP Port** values (e.g. `http://192.168.99.100:10880/`).
 
-Remark
-------
+Full documentation of application settings can be found [here](https://github.com/gogs/gogs/blob/main/conf/app.ini).
 
-After you execute `assemble_blocks.sh` you should always trigger `fig build` to inculde the the new init script `init_gogs.sh` in the docker image.
+### Container options
 
-If you want to use another GoGS docker file, but keep everything else the same, you can create a block, e.g. `docker_gogs_custom`, with only a `Dockerfile` and call
+This container has some options available via environment variables, these options are opt-in features that can help the administration of this container:
 
-```sh
-./assemble_blocks.sh docker_gogs_custom w_db option_database_mysql
-```
+- **SOCAT_LINK**:
+  - <u>Possible value:</u>
+      `true`, `false`, `1`, `0`
+  - <u>Default:</u>
+      `true`
+  - <u>Action:</u>
+      Bind linked docker container to localhost socket using socat.
+      Any exported port from a linked container will be binded to the matching port on localhost.
+  - <u>Disclaimer:</u>
+      As this option rely on the environment variable created by docker when a container is linked, this option should be deactivated in managed environment such as Rancher or Kubernetes (set to `0` or `false`)
+- **RUN_CROND**:
+  - <u>Possible value:</u>
+      `true`, `false`, `1`, `0`
+  - <u>Default:</u>
+      `false`
+  - <u>Action:</u>
+      Request crond to be run inside the container. Its default configuration will periodically run all scripts from `/etc/periodic/${period}` but custom crontabs can be added to `/var/spool/cron/crontabs/`.
+- **BACKUP_INTERVAL**:
+  - <u>Possible value:</u>
+      `3h`, `7d`, `3M`
+  - <u>Default:</u>
+      `null`
+  - <u>Action:</u>
+      In combination with `RUN_CROND` set to `true`, enables backup system.\
+      See: [Backup System](#backup-system)
+- **BACKUP_RETENTION**:
+  - <u>Possible value:</u>
+      `360m`, `7d`, `...m/d`
+  - <u>Default:</u>
+      `7d`
+  - <u>Action:</u>
+      Used by backup system. Backups older than specified in expression are deleted periodically.\
+      See: [Backup System](#backup-system)
+- **BACKUP_ARG_CONFIG**:
+  - <u>Possible value:</u>
+      `/app/gogs/example/custom/config`
+  - <u>Default:</u>
+      `null`
+  - <u>Action:</u>
+      Used by backup system. If defined, supplies `--config` argument to `gogs backup`.\
+      See: [Backup System](#backup-system)
+- **BACKUP_ARG_EXCLUDE_REPOS**:
+  - <u>Possible value:</u>
+      `test-repo1`, `test-repo2`
+  - <u>Default:</u>
+      `null`
+  - <u>Action:</u>
+      Used by backup system. If defined, supplies `--exclude-repos` argument to `gogs backup`.\
+      See: [Backup System](#backup-system)
+- **BACKUP_EXTRA_ARGS**:
+  - <u>Possible value:</u>
+      `--verbose --exclude-mirror-repos`
+  - <u>Default:</u>
+      `null`
+  - <u>Action:</u>
+      Used by backup system. If defined, append content to arguments to `gogs backup`.\
+      See: [Backup System](#backup-system)
 
-This will pull in the `Dockerfile` from `docker_gogs` instead of the one from `docker_gogs`.
+## Backup system
 
-`Dockerfile`s for the `master` and `dev` branch are provided as `docker_gogs` and `docker_gogs_dev`
+Automated backups with retention policy:
 
+- `BACKUP_INTERVAL` controls how often the backup job runs and supports interval in hours (h), days (d), and months (M), eg. `3h`, `7d`, `3M`. The lowest possible value is one hour (`1h`).
+- `BACKUP_RETENTION` supports expressions in minutes (m) and days (d), eg. `360m`, `2d`. The lowest possible value is 60 minutes (`60m`).
 
-[fig]:http://www.fig.sh/
+## Upgrade
+
+:exclamation::exclamation::exclamation:<span style="color: red">**Make sure you have volumed data to somewhere outside Docker container**</span>:exclamation::exclamation::exclamation:
+
+Steps to upgrade Gogs with Docker:
+
+- `docker pull gogs/gogs`
+- `docker stop gogs`
+- `docker rm gogs`
+- Finally, create a container for the first time and don't forget to do the same for the volume and port mapping.
+
+## Known issues
+
+- The docker container cannot currently be built on Raspberry 1 (armv6l) as our base image `alpine` does not have a `go` package available for this platform.
+
+## Useful links
+
+- [Share port 22 between Gogs inside Docker & the local system](http://www.ateijelo.com/blog/2016/07/09/share-port-22-between-docker-gogs-ssh-and-local-system)
