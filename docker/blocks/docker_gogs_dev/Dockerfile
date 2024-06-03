@@ -1,4 +1,4 @@
-FROM ubuntu:14.04
+FROM ubuntu:24.04
 
 # This part is derived from the official docker image ------------------
 
